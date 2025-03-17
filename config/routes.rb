@@ -5,7 +5,6 @@ Rails.application.routes.draw do
 
   # User authentication
   devise_for :users, controllers: {
-      omniauth_callbacks: "users/omniauth_callbacks",
       registrations: "users/registrations",
       confirmations: "users/confirmations",
       passwords: "users/passwords",
@@ -20,6 +19,8 @@ Rails.application.routes.draw do
       post "login", to: "auth#login"
       delete "logout", to: "auth#logout"
       post "resend_confirmation", to: "auth#resend_confirmation"
+      post "github", to: "auth#github"
+      post "google", to: "auth#google"
 
       # Users management
       resources :users, only: [ :index, :show, :update, :destroy ] do
@@ -29,6 +30,8 @@ Rails.application.routes.draw do
           post "unban", to: "users#unban"
         end
       end
+
+      resource :profile, only: [ :show, :update ], controller: "profile"
     end
   end
 
