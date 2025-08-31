@@ -81,6 +81,7 @@ ActiveAdmin.register_page "Dashboard" do
             li link_to "Usuarios de Google", admin_users_path(scope: :google_users)
             li link_to "API Info", "/api/info", target: "_blank"
             li link_to "Health Check", "/up", target: "_blank"
+            li link_to "📚 API Documentation (Swagger)", "/api-docs", target: "_blank", style: "color: #3498db; font-weight: bold;"
           end
         end
       end
@@ -88,10 +89,11 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         panel "Documentación" do
           ul do
-            li link_to "Guía de la API", "#", target: "_blank"
-            li link_to "Configuración de Google OAuth", "#", target: "_blank"
-            li link_to "Ejemplos de uso", "/api/info", target: "_blank"
-            li link_to "Repositorio en GitHub", "#", target: "_blank"
+            li link_to "📚 API Documentation (Swagger)", "/api-docs", target: "_blank", style: "color: #3498db; font-weight: bold;"
+            li link_to "🔧 API Info & Examples", "/api/info", target: "_blank"
+            li link_to "⚙️ Configuración de Google OAuth", "#", target: "_blank"
+            li link_to "📖 Guía de Desarrollo", "#", target: "_blank"
+            li link_to "🐙 Repositorio en GitHub", "#", target: "_blank"
           end
         end
       end

@@ -1,5 +1,12 @@
 # Controlador para manejar autenticación (login, register, logout)
-class Api::AuthController < Api::AuthBaseController
+class Api::AuthController < ActionController::Base
+  # Omitir la verificación CSRF para API
+  skip_before_action :verify_authenticity_token
+  
+  # Manejar errores de autenticación
+  rescue_from StandardError, with: :handle_standard_error
+  rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
+  rescue_from ActiveRecord::RecordInvalid, with: :handle_validation_error
   
   # POST /api/auth/register
   # Registrar un nuevo usuario con email y contraseña
@@ -88,65 +95,74 @@ class Api::AuthController < Api::AuthBaseController
       render_error('Error en autenticación con Google', :internal_server_error)
     end
   end
-  
-  # POST /api/auth/logout
-  # Cerrar sesión (invalidar token)
-  def logout
-    return unless authenticate_user!
-    
-    # En JWT, el logout se maneja del lado del cliente eliminando el token
-    # Aquí podríamos implementar una lista negra de tokens si fuera necesario
-    
-    render_success({}, 'Sesión cerrada exitosamente')
-  end
-  
-  # GET /api/auth/me
-  # Obtener información del usuario actual
-  def me
-    return unless authenticate_user!
-    
-    render_success({
-      user: user_response(current_user)
-    }, 'Información del usuario obtenida')
-  end
-  
-  # PUT /api/auth/profile
-  # Actualizar perfil del usuario
-  def update_profile
-    return unless authenticate_user!
-    
-    if current_user.update(user_update_params)
-      render_success({
-        user: user_response(current_user)
-      }, 'Perfil actualizado exitosamente')
-    else
-      render_error(
-        'Error al actualizar perfil',
-        :unprocessable_entity,
-        current_user.errors.full_messages
-      )
-    end
-  end
-  
+
   private
   
-  # Método para obtener el usuario actual desde el token JWT
-  def current_user
-    @current_user ||= authenticate_user_from_token
+  # Renderizar respuesta de éxito estándar
+  def render_success(data = {}, message = 'Operación exitosa', status = :ok)
+    render json: {
+      success: true,
+      message: message,
+      data: data
+    }, status: status
   end
   
-  # Extraer y validar el token JWT del header Authorization
-  def authenticate_user_from_token
-    # Obtener el header Authorization
-    auth_header = request.headers['Authorization']
+  # Renderizar respuesta de error estándar
+  def render_error(message, status = :bad_request, errors = nil)
+    response = {
+      success: false,
+      message: message
+    }
     
-    # Verificar que existe y tiene el formato correcto
-    return nil unless auth_header && auth_header.start_with?('Bearer ')
+    response[:errors] = errors if errors.present?
     
-    # Extraer el token (remover "Bearer ")
-    token = auth_header.split(' ').last
+    render json: response, status: status
+  end
+  
+  # Manejar errores estándar
+  def handle_standard_error(exception)
+    Rails.logger.error "API Error: #{exception.class} - #{exception.message}"
+    Rails.logger.error exception.backtrace.join("\n")
     
-    # Obtener el usuario usando el servicio JWT
-    JwtService.get_user_from_token(token)
+    render_error(
+      'Ha ocurrido un error interno del servidor',
+      :internal_server_error
+    )
+  end
+  
+  # Manejar errores de registro no encontrado
+  def handle_not_found(exception)
+    render_error(
+      'El recurso solicitado no fue encontrado',
+      :not_found
+    )
+  end
+  
+  # Manejar errores de validación
+  def handle_validation_error(exception)
+    render_error(
+      'Error de validación',
+      :unprocessable_entity,
+      exception.record.errors.full_messages
+    )
+  end
+  
+  # Parámetros permitidos para registro de usuario
+  def user_registration_params
+    params.require(:user).permit(:email, :password, :password_confirmation, :first_name, :last_name)
+  end
+  
+
+  
+  # Verificar que el usuario esté autenticado
+  def authenticate_user!
+    unless current_user
+      render_error(
+        'Token inválido o expirado',
+        :unauthorized
+      )
+      return false
+    end
+    true
   end
 end

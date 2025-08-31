@@ -8,6 +8,8 @@ Un **Backend as a Service (BaaS)** completo construido con Ruby on Rails que pro
 - 🔑 **Google OAuth** - Autenticación social con Google
 - 👑 **Panel de Administración** - ActiveAdmin para gestión de usuarios
 - 🌐 **API REST** - Endpoints completos con documentación
+- 📚 **Swagger/OpenAPI** - Documentación interactiva de la API
+- 🎨 **Diseño Moderno** - ActiveAdmin con gradientes y animaciones
 - 🛡️ **Seguridad** - Validaciones, CORS, y manejo de errores
 - 📊 **Dashboard** - Estadísticas y monitoreo en tiempo real
 - 🏗️ **Arquitectura escalable** - Servicios modulares y bien estructurados
@@ -101,6 +103,28 @@ docker compose up --build
 - Credenciales admin: `admin@rails-baas.com` / `password123`
 
 ## 📚 Documentación de la API
+
+### Swagger UI - Documentación Interactiva
+La API incluye documentación interactiva completa usando Swagger/OpenAPI 3.0:
+
+- **URL**: http://localhost:3000/api-docs
+- **Especificación YAML**: http://localhost:3000/swagger/v1/swagger.yaml
+- **Especificación JSON**: http://localhost:3000/swagger/v1/swagger.json
+
+### Características de la Documentación
+- ✅ **Interactiva** - Prueba endpoints directamente desde el navegador
+- ✅ **Autenticación JWT** - Configuración automática de tokens
+- ✅ **Ejemplos** - Request/response examples para cada endpoint
+- ✅ **Validación** - Esquemas completos con validaciones
+- ✅ **Categorizada** - Endpoints organizados por funcionalidad
+
+### Uso de Swagger UI
+1. Accede a http://localhost:3000/api-docs
+2. Autentícate usando el endpoint `/api/auth/login`
+3. Copia el token JWT de la respuesta
+4. Haz clic en "Authorize" en Swagger UI
+5. Ingresa el token como `Bearer <tu-token>`
+6. ¡Prueba todos los endpoints protegidos!
 
 ### Endpoints de Autenticación
 

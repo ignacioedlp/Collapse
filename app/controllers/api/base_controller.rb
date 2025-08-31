@@ -1,6 +1,8 @@
 # Controlador base para todos los endpoints de la API
 # Incluye autenticación JWT y manejo de errores común
 class Api::BaseController < ActionController::Base
+  include UserResponseConcern
+  
   # Omitir la verificación CSRF para API
   skip_before_action :verify_authenticity_token
   

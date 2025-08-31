@@ -11,23 +11,33 @@ Rails.application.routes.draw do
 
   # API Routes
   namespace :api do
-    # Rutas de autenticación
+    # Rutas de autenticación (v1 - sin versionar para mantener compatibilidad)
     scope :auth do
       post :register, to: 'auth#register'
       post :login, to: 'auth#login'
       post :logout, to: 'auth#logout'
       post :google, to: 'auth#google_auth'
-      get :me, to: 'auth#me'
-      put :profile, to: 'auth#update_profile'
     end
     
-    # Rutas de usuarios (CRUD completo)
-    resources :users, only: [:index, :show, :update, :destroy]
-    
-    # Ruta de información del sistema
-    get :info, to: 'system#info'
+    # API v1 - Rutas versionadas
+    namespace :v1 do
+      # Rutas usuarios
+      get :me, to: 'me#show'
+      put :me, to: 'me#edit'
+      
+      # Ruta de información del sistema
+      get :info, to: 'system#info'
+    end
   end
 
   # Ruta raíz para mostrar información de la API
   root 'application#index'
+  
+  # Swagger UI
+  mount Rswag::Ui::Engine => '/api-docs'
+  mount Rswag::Api::Engine => '/api-docs'
+  
+  # Swagger JSON and YAML
+  get '/swagger/v1/swagger.yaml', to: 'swagger#yaml'
+  get '/swagger/v1/swagger.json', to: 'swagger#index'
 end
