@@ -1,0 +1,80 @@
+// Sass variable overrides must be declared before loading up Active Admin's styles.
+//
+// To view the variables that Active Admin provides, take a look at
+// `app/assets/stylesheets/active_admin/mixins/_variables.scss` in the
+// Active Admin source.
+//
+// For example, to change the sidebar width:
+// $sidebar-width: 242px;
+
+// Active Admin's got SASS!
+@import "active_admin/mixins";
+@import "active_admin/base";
+
+// Overriding any non-variable Sass must be done after the fact.
+// For example, to change the default status-tag color:
+//
+//   .status_tag { background: #6090DB; }
+
+// Estilos personalizados para Rails BaaS Admin
+.admin_title_image {
+  max-height: 30px;
+  margin-right: 10px;
+}
+
+#header {
+  background: #2c3e50;
+
+  h1 {
+    color: #ecf0f1;
+    font-weight: 300;
+
+    a {
+      color: #ecf0f1;
+      text-decoration: none;
+
+      &:hover {
+        color: #3498db;
+      }
+    }
+  }
+}
+
+#utility_nav {
+  background: #34495e;
+
+  a {
+    color: #ecf0f1;
+
+    &:hover {
+      color: #3498db;
+    }
+  }
+}
+
+.panel {
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status_tag {
+  border-radius: 12px;
+  font-weight: 500;
+
+  &.yes,
+  &.ok {
+    background: #27ae60;
+    color: white;
+  }
+
+  &.no,
+  &.error {
+    background: #e74c3c;
+    color: white;
+  }
+
+  &.warning {
+    background: #f39c12;
+    color: white;
+  }
+}
