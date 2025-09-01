@@ -1,0 +1,130 @@
+#!/bin/bash
+
+# Script para ejecutar linters fácilmente
+# Uso: ./scripts/lint [rubocop|standard|brakeman|all]
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+# Check if we're in a Rails project
+if [ ! -f "Gemfile" ]; then
+    print_error "This doesn't appear to be a Rails project (no Gemfile found)"
+    exit 1
+fi
+
+# Check if docker-compose.yml exists
+if [ ! -f "docker-compose.yml" ]; then
+    print_error "docker-compose.yml not found. Please run this script from the project root."
+    exit 1
+fi
+
+# Function to run RuboCop
+run_rubocop() {
+    print_info "Running RuboCop..."
+    if docker compose exec -T app bundle exec rubocop app/ --format simple; then
+        print_status "RuboCop passed"
+        return 0
+    else
+        print_error "RuboCop found issues"
+        return 1
+    fi
+}
+
+# Function to run Standard
+run_standard() {
+    print_info "Running Standard..."
+    if docker compose exec -T app bundle exec standardrb app/ --format simple; then
+        print_status "Standard passed"
+        return 0
+    else
+        print_error "Standard found issues"
+        return 1
+    fi
+}
+
+# Function to run Brakeman
+run_brakeman() {
+    print_info "Running Brakeman security check..."
+    if docker compose exec -T app bundle exec brakeman --no-progress --quiet; then
+        print_status "Brakeman security check passed"
+        return 0
+    else
+        print_warning "Brakeman found potential security issues"
+        return 0  # Don't fail for security warnings
+    fi
+}
+
+# Function to run all linters
+run_all() {
+    print_info "Running all linters..."
+    local exit_code=0
+    
+    if ! run_rubocop; then
+        exit_code=1
+    fi
+    
+    if ! run_standard; then
+        exit_code=1
+    fi
+    
+    if ! run_brakeman; then
+        exit_code=1
+    fi
+    
+    if [ $exit_code -eq 0 ]; then
+        print_status "All linters passed! 🎉"
+    else
+        print_error "Some linters found issues"
+    fi
+    
+    return $exit_code
+}
+
+# Main script logic
+case "${1:-all}" in
+    "rubocop")
+        run_rubocop
+        ;;
+    "standard")
+        run_standard
+        ;;
+    "brakeman")
+        run_brakeman
+        ;;
+    "all")
+        run_all
+        ;;
+    *)
+        echo "Usage: $0 [rubocop|standard|brakeman|all]"
+        echo ""
+        echo "Options:"
+        echo "  rubocop   - Run only RuboCop"
+        echo "  standard  - Run only Standard"
+        echo "  brakeman  - Run only Brakeman"
+        echo "  all       - Run all linters (default)"
+        exit 1
+        ;;
+esac

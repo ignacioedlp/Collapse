@@ -6,3 +6,81 @@ inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false
+
+# Additional rules for better code quality
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+  Exclude:
+    - 'db/**/*'
+    - 'config/**/*'
+    - 'script/**/*'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+
+# Style rules
+Style/Documentation:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+# Layout rules
+Layout/LineLength:
+  Max: 120
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+# Metrics rules
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/AbcSize:
+  Max: 30
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/ModuleLength:
+  Max: 200
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+
+# Naming rules
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
+# Performance rules
+Performance/StringReplacement:
+  Enabled: true
+
+Performance/RedundantMatch:
+  Enabled: true
+
+# Rails specific rules
+Rails/FilePath:
+  EnforcedStyle: arguments
+
+Rails/TimeZone:
+  EnforcedStyle: strict
+
+Rails/Date:
+  EnforcedStyle: strict
+
+# Security rules
+Security/YAMLLoad:
+  Enabled: true
+
+# Lint rules
+Lint/UnusedMethodArgument:
+  AllowUnusedKeywordArguments: true

@@ -1,0 +1,38 @@
+# Standard configuration for Rails project
+ruby_version: 3.2
+fix: true
+format: progress
+
+# Ignore certain files and directories
+ignore:
+  - 'db/**/*'
+  - 'config/**/*'
+  - 'script/**/*'
+  - 'bin/**/*'
+  - 'vendor/**/*'
+  - 'node_modules/**/*'
+  - 'tmp/**/*'
+  - 'log/**/*'
+  - 'storage/**/*'
+  - 'public/**/*'
+
+# Custom rules
+rules:
+  # Allow single quotes for strings
+  Style/StringLiterals:
+    EnforcedStyle: single_quotes
+  
+  # Allow trailing commas in multiline arrays/hashes
+  Style/TrailingCommaInArrayLiteral:
+    EnforcedStyleForMultiline: comma
+  
+  Style/TrailingCommaInHashLiteral:
+    EnforcedStyleForMultiline: comma
+  
+  # Allow longer lines for better readability
+  Layout/LineLength:
+    Max: 120
+  
+  # Allow unused method arguments in certain contexts
+  Lint/UnusedMethodArgument:
+    AllowUnusedKeywordArguments: true

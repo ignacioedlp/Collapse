@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# Pre-commit hook script for Rails project
+# This script runs code quality checks before each commit
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+# Check if we're in a Rails project
+if [ ! -f "Gemfile" ]; then
+    print_error "This doesn't appear to be a Rails project (no Gemfile found)"
+    exit 1
+fi
+
+# Check if docker-compose.yml exists
+if [ ! -f "docker-compose.yml" ]; then
+    print_error "docker-compose.yml not found. Please run this script from the project root."
+    exit 1
+fi
+
+# Run RuboCop
+echo "Running RuboCop..."
+if docker compose exec -T app bundle exec rubocop app/ --format simple; then
+    print_status "RuboCop passed"
+else
+    print_error "RuboCop found issues. Please fix them before committing."
+    exit 1
+fi
+
+# Run Standard
+echo "Running Standard..."
+if docker compose exec -T app bundle exec standardrb app/ --format simple; then
+    print_status "Standard passed"
+else
+    print_error "Standard found issues. Please fix them before committing."
+    exit 1
+fi
+
+# Run Brakeman (security check)
+echo "Running Brakeman security check..."
+if docker compose exec -T app bundle exec brakeman --no-progress --quiet; then
+    print_status "Brakeman security check passed"
+else
+    print_warning "Brakeman found potential security issues. Please review them."
+    # Don't fail the commit for security warnings, just warn
+fi
+
+# Run RSpec tests if they exist
+if [ -d "spec" ]; then
+    echo "Running RSpec tests..."
+    if docker compose exec -T app bundle exec rspec --format progress; then
+        print_status "RSpec tests passed"
+    else
+        print_error "RSpec tests failed. Please fix them before committing."
+        exit 1
+    fi
+fi
+
+print_status "All pre-commit checks passed! 🎉"
+print_status "Ready to commit your changes."
