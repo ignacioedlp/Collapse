@@ -32,20 +32,98 @@ ActiveAdmin.register_page 'Dashboard' do
       end
     end
 
-    # Gráfico de usuarios registrados por día (últimos 30 días)
+    # Datos de registros diarios (últimos 7 días)
     columns do
       column do
-        panel 'Registros de los Últimos 30 Días' do
+        panel 'Registros de Usuarios - Últimos 7 Días' do
           # Datos para el gráfico
-          registrations_data = (30.days.ago.to_date..Date.current).map do |date|
+          registrations_data = (7.days.ago.to_date..Date.current).map do |date|
             count = User.where(created_at: date.beginning_of_day..date.end_of_day).count
-            [ date.strftime('%d/%m'), count ]
+            [date.strftime('%d/%m'), count]
           end
 
           # Tabla simple con los datos
           table_for registrations_data do
             column('Fecha') { |data| data[0] }
             column('Registros') { |data| data[1] }
+          end
+          
+          # Resumen
+          total_registrations = registrations_data.sum { |data| data[1] }
+          para "Total de registros en los últimos 7 días: #{total_registrations}"
+        end
+      end
+
+      column do
+        panel 'Distribución de Usuarios' do
+          # Datos de distribución
+          confirmed_count = User.confirmed.count
+          unconfirmed_count = User.unconfirmed.count
+          google_count = User.google_users.count
+          local_count = User.local_users.count
+
+          # Tabla de distribución
+          table_for [
+            ['Confirmados', confirmed_count],
+            ['Sin confirmar', unconfirmed_count],
+            ['Google OAuth', google_count],
+            ['Local', local_count]
+          ] do
+            column('Categoría') { |data| data[0] }
+            column('Cantidad') { |data| data[1] }
+          end
+          
+          # Resumen
+          total_users = confirmed_count + unconfirmed_count
+          para "Total de usuarios: #{total_users}"
+        end
+      end
+    end
+
+    # Datos semanales
+    columns do
+      column do
+        panel 'Tendencia Semanal de Registros' do
+          # Datos semanales
+          weekly_data = (4.weeks.ago.to_date..Date.current).step(7).map do |week_start|
+            week_end = week_start + 6.days
+            count = User.where(created_at: week_start.beginning_of_day..week_end.end_of_day).count
+            ["Semana #{week_start.strftime('%d/%m')}", count]
+          end
+
+          # Tabla semanal
+          table_for weekly_data do
+            column('Semana') { |data| data[0] }
+            column('Registros') { |data| data[1] }
+          end
+          
+          # Resumen
+          total_weekly = weekly_data.sum { |data| data[1] }
+          para "Total de registros en las últimas 4 semanas: #{total_weekly}"
+        end
+      end
+
+      column do
+        panel 'Proveedores de Autenticación' do
+          # Datos de proveedores
+          google_count = User.google_users.count
+          local_count = User.local_users.count
+
+          # Tabla de proveedores
+          table_for [
+            ['Google OAuth', google_count],
+            ['Email/Password', local_count]
+          ] do
+            column('Proveedor') { |data| data[0] }
+            column('Usuarios') { |data| data[1] }
+          end
+          
+          # Resumen
+          total_auth = google_count + local_count
+          if total_auth > 0
+            google_percent = ((google_count.to_f / total_auth) * 100).round(1)
+            local_percent = ((local_count.to_f / total_auth) * 100).round(1)
+            para "Google OAuth: #{google_percent}% | Local: #{local_percent}%"
           end
         end
       end

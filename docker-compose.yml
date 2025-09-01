@@ -1,5 +1,4 @@
 # Docker Compose para Rails BaaS
-version: '3.8'
 
 services:
   # Aplicación Rails
@@ -18,8 +17,7 @@ services:
       - .:/app
       - bundle_cache:/usr/local/bundle
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     command: >
       bash -c "
         echo 'Esperando a PostgreSQL...' &&

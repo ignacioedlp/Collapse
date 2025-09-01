@@ -27,7 +27,7 @@ ActiveAdmin.register User do
     end
 
     column :roles do |user|
-      user.roles.map { |role| status_tag(role.name, class: 'ok') }.join(' ').html_safe
+      user.roles.map { |role| role.name }.join(' ').html_safe
     end
 
     column :created_at do |user|
@@ -39,6 +39,18 @@ ActiveAdmin.register User do
     end
 
     actions
+  end
+
+  # Configuración de controller para optimizar consultas
+  controller do
+    def scoped_collection
+      # Solución específica para Rolify: usar distinct para evitar duplicados
+      super.distinct.preload(:roles)
+    end
+
+    def find_resource
+      User.preload(:roles).find(params[:id])
+    end
   end
 
   # Filtros en la barra lateral
@@ -96,6 +108,10 @@ ActiveAdmin.register User do
 
       row :confirmed_at do |user|
         user.confirmed_at&.strftime('%d/%m/%Y %H:%M') || 'No confirmado'
+      end
+
+      row :roles do |user|
+        user.roles.map { |role| role.name }.join(' ').html_safe
       end
 
       row :created_at do |user|
