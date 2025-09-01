@@ -1,16 +1,18 @@
 # Controlador base para todos los endpoints de la API
 # Incluye autenticación JWT y manejo de errores común
-class Api::BaseController < ActionController::Base
-  include UserResponseConcern
-  
+class Api::BaseController < ActionController::Base  
   # Omitir la verificación CSRF para API
   skip_before_action :verify_authenticity_token
   
   # Ejecutar autenticación antes de cada acción
   before_action :authenticate_user!
   
+  # Incluir Pundit para autorización
+  include Pundit::Authorization
+  
   # Manejar errores de autenticación
   rescue_from StandardError, with: :handle_standard_error
+  rescue_from Pundit::NotAuthorizedError, with: :handle_unauthorized
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
   rescue_from ActiveRecord::RecordInvalid, with: :handle_validation_error
   
@@ -100,6 +102,14 @@ class Api::BaseController < ActionController::Base
       'Error de validación',
       :unprocessable_entity,
       exception.record.errors.full_messages
+    )
+  end
+  
+  # Manejar errores de autorización
+  def handle_unauthorized(exception)
+    render_error(
+      'No tienes permisos para realizar esta acción',
+      :forbidden
     )
   end
 end

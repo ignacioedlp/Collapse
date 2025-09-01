@@ -26,6 +26,10 @@ ActiveAdmin.register User do
       status_tag(user.confirmed? ? "Sí" : "No", class: user.confirmed? ? "ok" : "error")
     end
     
+    column :roles do |user|
+      user.roles.map { |role| status_tag(role.name, class: "ok") }.join(" ").html_safe
+    end
+    
     column :created_at do |user|
       user.created_at.strftime("%d/%m/%Y %H:%M")
     end
@@ -56,6 +60,10 @@ ActiveAdmin.register User do
     
     f.inputs "Estado" do
       f.input :confirmed_at, as: :datetime_picker, hint: "Fecha de confirmación (dejar vacío si no está confirmado)"
+    end
+    
+    f.inputs "Roles" do
+      f.input :roles, as: :check_boxes, collection: Role.all, hint: "Selecciona los roles del usuario"
     end
     
     f.actions

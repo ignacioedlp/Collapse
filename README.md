@@ -11,6 +11,8 @@ Un **Backend as a Service (BaaS)** completo construido con Ruby on Rails que pro
 - 📚 **Swagger/OpenAPI** - Documentación interactiva de la API
 - 🎨 **Diseño Moderno** - ActiveAdmin con gradientes y animaciones
 - 🛡️ **Seguridad** - Validaciones, CORS, y manejo de errores
+- 🔒 **Rate Limiting** - Protección contra abuso con Rack Attack
+- 🎭 **Roles & Permisos** - Sistema de autorización con Pundit y Rolify
 - 📊 **Dashboard** - Estadísticas y monitoreo en tiempo real
 - 🏗️ **Arquitectura escalable** - Servicios modulares y bien estructurados
 
@@ -125,6 +127,59 @@ La API incluye documentación interactiva completa usando Swagger/OpenAPI 3.0:
 4. Haz clic en "Authorize" en Swagger UI
 5. Ingresa el token como `Bearer <tu-token>`
 6. ¡Prueba todos los endpoints protegidos!
+
+## 🔒 Rate Limiting
+
+El BaaS incluye protección contra abuso con **Rack Attack**:
+
+### Límites Configurados
+- **Registro**: 5 intentos por hora por IP
+- **Login**: 10 intentos por hora por IP
+- **Google OAuth**: 20 intentos por hora por IP
+- **API general**: 1000 requests por hora por IP
+- **Usuario autenticado**: 5000 requests por hora
+- **Escritura por usuario**: 1000 requests por hora
+
+### Respuestas de Rate Limiting
+```json
+{
+  "success": false,
+  "error": "rate_limit_exceeded",
+  "message": "Has excedido el límite de solicitudes. Por favor, intenta de nuevo más tarde.",
+  "retry_after": 3600,
+  "limit": 5,
+  "remaining": 0
+}
+```
+
+### Pruebas de Rate Limiting
+```bash
+./scripts/test_rate_limiting.sh
+```
+
+## 🎭 Roles y Permisos
+
+Sistema de autorización robusto con **Pundit** y **Rolify**:
+
+### Roles Disponibles
+- **admin**: Acceso completo al sistema
+- **moderator**: Gestión de usuarios y contenido
+- **user**: Acceso básico (por defecto)
+
+### Permisos por Rol
+- **admin**: Todo el sistema
+- **moderator**: Gestión de usuarios, contenido
+- **user**: Solo su propio perfil
+
+### Gestión de Roles
+- Panel Admin: http://localhost:3000/admin
+- Editar usuarios y asignar roles
+- Los roles se aplican automáticamente en la API
+
+### Pruebas de Roles
+```bash
+./scripts/test_roles.sh
+```
 
 ### Endpoints de Autenticación
 

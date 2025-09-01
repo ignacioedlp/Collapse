@@ -21,6 +21,24 @@ else
   admin.errors.full_messages.each { |msg| puts "   - #{msg}" }
 end
 
+# Crear roles por defecto
+puts "\n🎭 Creando roles del sistema..."
+
+roles = ['owner', 'moderator', 'user']
+roles_created = 0
+
+roles.each do |role_name|
+  role = Role.find_or_create_by(name: role_name)
+  if role.persisted?
+    roles_created += 1
+    puts "   - Rol '#{role_name}' creado"
+  else
+    puts "   ❌ Error al crear rol '#{role_name}': #{role.errors.full_messages.join(', ')}"
+  end
+end
+
+puts "✅ #{roles_created} roles creados"
+
 # Crear algunos usuarios de prueba
 puts "\n👥 Creando usuarios de prueba..."
 
@@ -72,6 +90,29 @@ puts "   - Administradores: #{AdminUser.count}"
 puts "   - Usuarios totales: #{User.count}"
 puts "   - Usuarios confirmados: #{User.confirmed.count}"
 puts "   - Usuarios sin confirmar: #{User.unconfirmed.count}"
+
+# Asignar rol de owner al primer usuario si existe (opcional)
+if User.count > 0 && Role.exists_by_name?('owner')
+  first_user = User.first
+  owner_role = Role.find_by(name: 'owner')
+  unless first_user.has_role?(:owner)
+    first_user.add_role(owner_role)
+    puts "✅ Rol de owner asignado al usuario: #{first_user.email}"
+  else
+    puts "✅ Usuario #{first_user.email} ya tiene rol de owner"
+  end
+end
+
+# Verificar que todos los usuarios tienen al menos el rol 'user'
+puts "\n🔍 Verificando roles de usuarios..."
+User.all.each do |user|
+  if user.roles.empty?
+    puts "⚠️  Usuario #{user.email} no tiene roles asignados"
+  else
+    role_names = user.roles.pluck(:name).join(', ')
+    puts "✅ Usuario #{user.email} tiene roles: #{role_names}"
+  end
+end
 
 puts "\n🎉 Seeds completados exitosamente!"
 puts "\n📝 Información importante:"

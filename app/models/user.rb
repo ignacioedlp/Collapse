@@ -1,6 +1,9 @@
 class User < ApplicationRecord
   # Usar bcrypt para encriptar passwords
-  has_secure_password validations: false
+  has_secure_password
+  
+  # Configuración de roles con Rolify para roles simples
+  rolify
   
   # Validaciones
   validates :email, presence: true, uniqueness: { case_sensitive: false }
@@ -11,6 +14,9 @@ class User < ApplicationRecord
   
   # Normalizar el email antes de guardarlo
   before_save :normalize_email
+  
+  # Asignar rol 'user' por defecto después de crear el usuario
+  after_create :assign_default_role
   
   # Scopes útiles
   scope :confirmed, -> { where.not(confirmed_at: nil) }
@@ -56,6 +62,7 @@ class User < ApplicationRecord
         confirmed_at: Time.current
       )
       user.save!
+      # El callback after_create se ejecutará automáticamente
     elsif !user.google_user?
       # Vincular cuenta existente con Google
       user.update!(
@@ -73,7 +80,37 @@ class User < ApplicationRecord
     self.email = email.downcase.strip if email.present?
   end
   
+  def assign_default_role
+    # Asignar rol 'user' por defecto si no tiene roles
+    unless has_role?(:user)
+      user_role = Role.find_by(name: 'user')
+      if user_role
+        add_role(user_role)
+        Rails.logger.info "Rol 'user' asignado automáticamente a #{email}"
+      else
+        Rails.logger.warn "Rol 'user' no encontrado en la base de datos"
+      end
+    end
+  end
+  
   def password_required?
     !google_user? && (new_record? || password.present?)
+  end
+  
+  # Métodos de autorización
+  def owner?
+    has_role?(:owner)
+  end
+  
+  def moderator?
+    has_role?(:moderator)
+  end
+  
+  def user?
+    has_role?(:user) || roles.empty?
+  end
+
+  def have_role?(role)
+    has_role?(role)
   end
 end
