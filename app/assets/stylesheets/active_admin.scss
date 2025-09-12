@@ -1,26 +1,17 @@
-// Sass variable overrides must be declared before loading up Active Admin's styles.
-//
-// To view the variables that Active Admin provides, take a look at
-// `app/assets/stylesheets/active_admin/mixins/_variables.scss` in the
-// Active Admin source.
-//
-// For example, to change the sidebar width:
-// $sidebar-width: 242px;
-
-// Variables personalizadas para Rails BaaS
-$primary-color: #3498db;
-$secondary-color: #2c3e50;
-$success-color: #27ae60;
-$warning-color: #f39c12;
-$danger-color: #e74c3c;
-$light-color: #ecf0f1;
-$dark-color: #34495e;
+// Variables personalizadas estilo Ruby (rojos y naranjas predominantes)
+$primary-color: #d62828; // rojo ruby intenso
+$secondary-color: #9d0208; // rojo oscuro elegante
+$success-color: #2b9348; // verde esmeralda (para contraste en tags success)
+$warning-color: #f77f00; // naranja fuerte
+$danger-color: #e63946; // rojo vibrante peligro
+$light-color: #fff3e6; // crema cálida
+$dark-color: #370617; // burdeos muy oscuro
 
 // Active Admin's got SASS!
 @import "active_admin/mixins";
 @import "active_admin/base";
 
-// Estilos personalizados para Rails BaaS Admin
+// Estilos personalizados para Ruby Admin
 .admin_title_image {
   max-height: 30px;
   margin-right: 10px;
@@ -29,12 +20,12 @@ $dark-color: #34495e;
 // Header mejorado
 #header {
   background: linear-gradient(135deg, $secondary-color 0%, $dark-color 100%);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 
   h1 {
     color: $light-color;
-    font-weight: 300;
-    font-size: 1.5em;
+    font-weight: 400;
+    font-size: 1.6em;
 
     a {
       color: $light-color;
@@ -42,7 +33,7 @@ $dark-color: #34495e;
       transition: color 0.3s ease;
 
       &:hover {
-        color: $primary-color;
+        color: $warning-color;
       }
     }
   }
@@ -50,7 +41,7 @@ $dark-color: #34495e;
 
 // Navegación de utilidad
 #utility_nav {
-  background: rgba(52, 73, 94, 0.9);
+  background: rgba(55, 6, 23, 0.9);
   backdrop-filter: blur(10px);
 
   a {
@@ -65,8 +56,8 @@ $dark-color: #34495e;
 
 // Sidebar mejorado
 #sidebar {
-  background: #f8f9fa;
-  border-right: 1px solid #e9ecef;
+  background: #fff8f6;
+  border-right: 1px solid #f1d0c8;
 
   .sidebar_section {
     h3 {
@@ -81,8 +72,8 @@ $dark-color: #34495e;
 // Paneles mejorados
 .panel {
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  border: 1px solid #e9ecef;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  border: 1px solid #f1d0c8;
   overflow: hidden;
 
   h3 {
@@ -90,11 +81,13 @@ $dark-color: #34495e;
     color: white;
     padding: 15px 20px;
     margin: 0;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.5px;
   }
 
   .panel_contents {
     padding: 20px;
+    background: #fffdfb;
   }
 }
 
@@ -130,7 +123,7 @@ $dark-color: #34495e;
 .index_table {
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   th {
     background: linear-gradient(135deg, $secondary-color 0%, $dark-color 100%);
@@ -143,11 +136,11 @@ $dark-color: #34495e;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: #f8f9fa;
+      background-color: #fff3e6;
     }
 
     &:nth-child(even) {
-      background-color: #f8f9fa;
+      background-color: #fff8f6;
     }
   }
 }
@@ -159,11 +152,11 @@ $dark-color: #34495e;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
   }
 
   &.primary {
@@ -197,12 +190,12 @@ $dark-color: #34495e;
     select,
     textarea {
       border-radius: 8px;
-      border: 2px solid #e9ecef;
+      border: 2px solid #f1d0c8;
       transition: border-color 0.3s ease;
 
       &:focus {
         border-color: $primary-color;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        box-shadow: 0 0 0 3px rgba(214, 40, 40, 0.2);
       }
     }
   }
@@ -221,128 +214,5 @@ $dark-color: #34495e;
         }
       }
     }
-  }
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  #header h1 {
-    font-size: 1.2em;
-  }
-
-  .panel {
-    border-radius: 8px;
-
-    h3 {
-      padding: 12px 15px;
-    }
-
-    .panel_contents {
-      padding: 15px;
-    }
-  }
-
-  .status_tag {
-    font-size: 0.8em;
-    padding: 3px 8px;
-  }
-}
-
-// Estilos para gráficos y tablas de respaldo
-.chartkick-not-available {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 10px 0;
-  text-align: center;
-
-  p {
-    margin: 5px 0;
-    color: #666;
-    font-size: 14px;
-  }
-}
-
-.chartkick-fallback {
-  .data-summary {
-    margin-top: 15px;
-
-    .summary-stats {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 10px;
-
-      p {
-        margin: 8px 0;
-        font-size: 14px;
-        color: #495057;
-
-        &:first-child {
-          font-weight: 600;
-          color: #212529;
-        }
-      }
-    }
-  }
-}
-
-.chartkick-fallback {
-  .data-table {
-    margin-top: 15px;
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-
-      th,
-      td {
-        padding: 8px 12px;
-        text-align: left;
-        border-bottom: 1px solid #e9ecef;
-      }
-
-      th {
-        background: #f8f9fa;
-        font-weight: 600;
-        color: #495057;
-      }
-
-      tr:hover {
-        background: #f8f9fa;
-      }
-    }
-  }
-}
-
-// Estilos para gráficos cuando Chartkick está disponible
-.chartkick-chart {
-  margin: 10px 0;
-
-  canvas {
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-}
-
-// Indicador de estado de Chartkick
-.chartkick-status {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &.available {
-    background: #d4edda;
-    color: #155724;
-  }
-
-  &.unavailable {
-    background: #f8d7da;
-    color: #721c24;
   }
 }

@@ -8,9 +8,16 @@ Rswag::Ui.configure do |c|
   # (under openapi_root) as JSON or YAML endpoints, then the list below should
   # correspond to the relative paths for those endpoints.
 
-  c.swagger_endpoint '/api-docs/v1/swagger.yaml', 'API V1 Docs'
+  c.openapi_endpoint '/api-docs/v1/swagger.yaml', 'API V1 Docs'
 
-  # Add Basic Auth in case your API is private
-  # c.basic_auth_enabled = true
-  # c.basic_auth_credentials 'username', 'password'
+  # UI configuration options
+  c.config_object['defaultModelsExpandDepth'] = 2
+  c.config_object['defaultModelExpandDepth'] = 2
+  c.config_object['defaultModelRendering'] = 'model'
+  c.config_object['displayRequestDuration'] = true
+  c.config_object['docExpansion'] = 'list'
+  c.config_object['filter'] = true
+  c.config_object['showExtensions'] = true
+  c.config_object['showCommonExtensions'] = true
+  c.config_object['tryItOutEnabled'] = true
 end
