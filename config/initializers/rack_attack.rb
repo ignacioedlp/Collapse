@@ -70,7 +70,7 @@ class Rack::Attack
   end
 
   # Configurar respuestas personalizadas
-  self.blocklisted_response = lambda do |env|
+  self.blocklisted_responder = lambda do |env|
     [429, {'Content-Type' => 'application/json'}, [{
       success: false,
       error: 'rate_limit_exceeded',
@@ -79,7 +79,7 @@ class Rack::Attack
     }.to_json]]
   end
 
-  self.throttled_response = lambda do |env|
+  self.throttled_responder = lambda do |env|
     [429, {'Content-Type' => 'application/json'}, [{
       success: false,
       error: 'rate_limit_exceeded',

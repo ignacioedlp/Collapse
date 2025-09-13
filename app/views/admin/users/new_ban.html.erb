@@ -1,0 +1,64 @@
+<% content_for(:title, @page_title) %>
+
+<div class="panel">
+  <h3>Banear Usuario: <%= resource.full_name %> (<%= resource.email %>)</h3>
+  
+  <%= form_with url: ban_admin_user_path(resource), method: :post, local: true, class: "formtastic" do |form| %>
+    <fieldset class="inputs">
+      <legend><span>Detalles del Baneo</span></legend>
+      
+      <ol>
+        <li class="text required" id="ban_reason_input">
+          <%= form.label :ban_reason, "Razón del baneo", class: "label" %>
+          <%= form.text_area :ban_reason, required: true, rows: 4, placeholder: "Explique la razón del baneo...", class: "form-control" %>
+          <p class="inline-hints">Proporcione una explicación clara de por qué se está baneando a este usuario.</p>
+        </li>
+        
+        <li class="datetime optional" id="ban_until_input">
+          <%= form.label :ban_until, "Banear hasta (opcional)", class: "label" %>
+          <%= form.datetime_local_field :ban_until, class: "form-control" %>
+          <p class="inline-hints">Deje vacío para un baneo permanente. Si especifica una fecha, el baneo será temporal.</p>
+        </li>
+      </ol>
+    </fieldset>
+    
+    <fieldset class="actions">
+      <ol>
+        <li class="action input_action">
+          <%= form.submit "Banear Usuario", class: "btn btn-danger" %>
+          <%= link_to "Cancelar", admin_user_path(resource), class: "btn btn-secondary" %>
+        </li>
+      </ol>
+    </fieldset>
+  <% end %>
+</div>
+
+<div class="panel">
+  <h3>Información del Usuario</h3>
+  <table class="table table-striped">
+    <tr>
+      <td><strong>Email:</strong></td>
+      <td><%= resource.email %></td>
+    </tr>
+    <tr>
+      <td><strong>Nombre completo:</strong></td>
+      <td><%= resource.full_name %></td>
+    </tr>
+    <tr>
+      <td><strong>Proveedor:</strong></td>
+      <td><%= resource.google_user? ? 'Google' : 'Local' %></td>
+    </tr>
+    <tr>
+      <td><strong>Confirmado:</strong></td>
+      <td><%= resource.confirmed? ? 'Sí' : 'No' %></td>
+    </tr>
+    <tr>
+      <td><strong>Roles:</strong></td>
+      <td><%= resource.roles.map(&:name).join(', ') %></td>
+    </tr>
+    <tr>
+      <td><strong>Creado:</strong></td>
+      <td><%= resource.created_at.strftime('%d/%m/%Y %H:%M') %></td>
+    </tr>
+  </table>
+</div>

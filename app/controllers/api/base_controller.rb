@@ -17,6 +17,9 @@ module Api
     rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
     rescue_from ActiveRecord::RecordInvalid, with: :handle_validation_error
 
+    # Verificar si el usuario está baneado antes de cada acción
+    before_action :check_user_banned, if: :user_signed_in?
+
     protected
 
     # Método para obtener el usuario actual desde el token JWT
@@ -38,6 +41,35 @@ module Api
     def skip_authentication
       # Este método puede ser llamado en controladores específicos
       # para omitir la autenticación en ciertas acciones
+    end
+
+    def check_user_banned
+      return unless current_user.is_a?(User) && current_user.banned?
+
+      # Limpiar baneos temporales expirados
+      if current_user.ban_expired?
+        current_user.unban!
+        return
+      end
+
+      # Responder según el formato de la request
+      respond_to do |format|
+        format.json do
+          render json: {
+            error: 'Cuenta baneada',
+            message: current_user.banned_reason || 'Tu cuenta ha sido suspendida.',
+            status: current_user.ban_status,
+            banned_until: current_user.banned_until
+          }, status: :forbidden
+        end
+        format.html do
+          redirect_to '/banned', alert: "Tu cuenta ha sido suspendida. Razón: #{current_user.banned_reason}"
+        end
+      end
+    end
+
+    def user_signed_in?
+      current_user.present?
     end
 
     private

@@ -5,6 +5,9 @@ class User < ApplicationRecord
   # Configuración de roles con Rolify para roles simples
   rolify
 
+  # Relaciones para el sistema de baneos
+  belongs_to :banned_by, class_name: 'AdminUser', optional: true
+
   # Validaciones
   validates :email, presence: true, uniqueness: { case_sensitive: false }
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -23,10 +26,16 @@ class User < ApplicationRecord
   scope :unconfirmed, -> { where(confirmed_at: nil) }
   scope :google_users, -> { where(provider: 'google') }
   scope :local_users, -> { where(provider: nil) }
+  
+  # Scopes para baneos
+  scope :banned, -> { where.not(banned_at: nil) }
+  scope :not_banned, -> { where(banned_at: nil) }
+  scope :permanently_banned, -> { banned.where(banned_until: nil) }
+  scope :temporarily_banned, -> { banned.where.not(banned_until: nil) }
 
   def self.ransackable_attributes(_auth_object = nil)
     %w[confirmed_at created_at email first_name google_id id id_value last_name
-      password_digest provider updated_at]
+      password_digest provider updated_at banned_at banned_reason banned_until]
   end
 
   def self.ransackable_associations(_auth_object = nil)
@@ -48,6 +57,46 @@ class User < ApplicationRecord
 
   def google_user?
     provider == 'google'
+  end
+
+  # Métodos para el sistema de baneos
+  def banned?
+    return false if banned_at.nil?
+    return true if banned_until.nil? # Baneo permanente
+    
+    banned_until > Time.current # Baneo temporal aún vigente
+  end
+
+  def ban!(reason:, admin_user:, until_date: nil)
+    update!(
+      banned_at: Time.current,
+      banned_reason: reason,
+      banned_by: admin_user,
+      banned_until: until_date
+    )
+  end
+
+  def unban!(admin_user: nil)
+    update!(
+      banned_at: nil,
+      banned_reason: nil,
+      banned_by: nil,
+      banned_until: nil
+    )
+  end
+
+  def ban_status
+    return 'activo' unless banned?
+    return 'baneado permanentemente' if banned_until.nil?
+    
+    "baneado hasta #{banned_until.strftime('%d/%m/%Y %H:%M')}"
+  end
+
+  def ban_expired?
+    return false if banned_at.nil?
+    return false if banned_until.nil? # Baneo permanente
+    
+    banned_until <= Time.current
   end
 
   # Método para autenticación con Google

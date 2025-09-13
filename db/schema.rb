@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_31_192000) do
+ActiveRecord::Schema[7.2].define(version: 2025_09_13_142659) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -48,6 +48,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_31_192000) do
     t.datetime "confirmed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "avatar"
+    t.datetime "banned_at"
+    t.text "banned_reason"
+    t.datetime "banned_until"
+    t.bigint "banned_by_id"
+    t.index ["banned_at"], name: "index_users_on_banned_at"
+    t.index ["banned_by_id"], name: "index_users_on_banned_by_id"
+    t.index ["banned_until"], name: "index_users_on_banned_until"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["google_id"], name: "index_users_on_google_id"
     t.index ["provider"], name: "index_users_on_provider"
@@ -61,6 +69,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_31_192000) do
     t.index ["user_id"], name: "index_users_roles_on_user_id"
   end
 
+  add_foreign_key "users", "admin_users", column: "banned_by_id"
   add_foreign_key "users_roles", "roles"
   add_foreign_key "users_roles", "users"
 end

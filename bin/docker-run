@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Script para ejecutar comandos en el contenedor Docker de forma rápida
+# Uso: docker-run <comando>
+# Ejemplo: docker-run rails generate migration AddUserImageToUsers user_image:string
+
+# Verificar que se proporcionó al menos un argumento
+if [ $# -eq 0 ]; then
+    echo "Error: Debes proporcionar un comando para ejecutar"
+    echo "Uso: docker-run <comando>"
+    echo "Ejemplo: docker-run rails generate migration AddUserImageToUsers user_image:string"
+    exit 1
+fi
+
+# Verificar que docker-compose.yml existe
+if [ ! -f "docker-compose.yml" ]; then
+    echo "Error: No se encontró docker-compose.yml en el directorio actual"
+    exit 1
+fi
+
+# Ejecutar el comando en el contenedor app
+echo "Ejecutando: docker compose exec app $@"
+docker compose exec app "$@"
