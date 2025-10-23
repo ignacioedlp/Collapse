@@ -1,0 +1,26 @@
+CUENTA SUSPENDIDA - Collapse
+
+Hola <%= @user.full_name %>,
+
+Te informamos que tu cuenta en Collapse ha sido suspendida.
+
+DETALLES DE LA SUSPENSIÓN:
+- Razón: <%= @reason %>
+- Tipo: <%= @is_temporary ? 'Suspensión temporal' : 'Suspensión permanente' %>
+<% if @is_temporary %>- Hasta: <%= @banned_until.strftime('%d/%m/%Y %H:%M') %>
+<% end %>- Administrador: <%= @admin_email %>
+
+<% if @is_temporary %>Esta es una suspensión TEMPORAL. Tu cuenta será reactivada automáticamente el <%= @banned_until.strftime('%d/%m/%Y a las %H:%M') %>.
+<% else %>Esta es una suspensión PERMANENTE. Tu cuenta no será reactivada automáticamente.
+<% end %>
+
+Si consideras que esta suspensión es un error o deseas apelar esta decisión, puedes contactar a nuestro equipo de soporte en: support@collapse.app
+
+Gracias por tu comprensión.
+
+Saludos,
+Equipo de Collapse
+
+---
+Este es un mensaje automático, por favor no respondas a este email.
+© <%= Date.current.year %> Collapse. Todos los derechos reservados.

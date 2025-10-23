@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cuenta Suspendida</title>
+    <style>
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; }
+      .header { background-color: #dc3545; color: white; padding: 20px; text-align: center; }
+      .content { padding: 30px; background-color: #f8f9fa; }
+      .footer { padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
+      .alert { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 15px 0; border-radius: 5px; }
+      .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Cuenta Suspendida</h1>
+      </div>
+      
+      <div class="content">
+        <p>Hola <strong><%= @user.full_name %></strong>,</p>
+        
+        <p>Te informamos que tu cuenta en <strong>Collapse</strong> ha sido suspendida.</p>
+        
+        <div class="alert">
+          <strong>Detalles de la suspensión:</strong><br>
+          <strong>Razón:</strong> <%= @reason %><br>
+          <strong>Tipo:</strong> <%= @is_temporary ? 'Suspensión temporal' : 'Suspensión permanente' %><br>
+          <% if @is_temporary %>
+            <strong>Hasta:</strong> <%= @banned_until.strftime('%d/%m/%Y %H:%M') %><br>
+          <% end %>
+          <strong>Administrador:</strong> <%= @admin_email %>
+        </div>
+        
+        <% if @is_temporary %>
+          <p>Esta es una suspensión <strong>temporal</strong>. Tu cuenta será reactivada automáticamente el <strong><%= @banned_until.strftime('%d/%m/%Y a las %H:%M') %></strong>.</p>
+        <% else %>
+          <p>Esta es una suspensión <strong>permanente</strong>. Tu cuenta no será reactivada automáticamente.</p>
+        <% end %>
+        
+        <p>Si consideras que esta suspensión es un error o deseas apelar esta decisión, puedes contactar a nuestro equipo de soporte.</p>
+        
+        <p>
+          <a href="mailto:support@collapse.app" class="btn">Contactar Soporte</a>
+        </p>
+        
+        <p>Gracias por tu comprensión.</p>
+        
+        <p>
+          Saludos,<br>
+          <strong>Equipo de Collapse</strong>
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p>Este es un mensaje automático, por favor no respondas a este email.</p>
+        <p>© <%= Date.current.year %> Collapse. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </body>
+</html>

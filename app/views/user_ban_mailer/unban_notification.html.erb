@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cuenta Reactivada</title>
+    <style>
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; }
+      .header { background-color: #28a745; color: white; padding: 20px; text-align: center; }
+      .content { padding: 30px; background-color: #f8f9fa; }
+      .footer { padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
+      .success { background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; margin: 15px 0; border-radius: 5px; }
+      .btn { display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>¡Cuenta Reactivada!</h1>
+      </div>
+      
+      <div class="content">
+        <p>Hola <strong><%= @user.full_name %></strong>,</p>
+        
+        <div class="success">
+          <strong>¡Buenas noticias!</strong> Tu cuenta en <strong>Collapse</strong> ha sido reactivada y ya puedes acceder normalmente a todos los servicios.
+        </div>
+        
+        <p>Tu suspensión ha sido levantada por: <strong><%= @admin_email %></strong></p>
+        
+        <p>Esperamos que disfrutes nuevamente de nuestros servicios. Recuerda seguir nuestras normas de la comunidad para evitar futuras suspensiones.</p>
+        
+        <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactar a nuestro equipo de soporte.</p>
+        
+        <p>
+          <a href="mailto:<%= @support_email %>" class="btn">Contactar Soporte</a>
+        </p>
+        
+        <p>¡Bienvenido de vuelta!</p>
+        
+        <p>
+          Saludos,<br>
+          <strong>Equipo de Collapse</strong>
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p>Este es un mensaje automático, por favor no respondas a este email.</p>
+        <p>© <%= Date.current.year %> Collapse. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </body>
+</html>

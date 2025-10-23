@@ -16,6 +16,30 @@ ActiveAdmin.register_page 'Dashboard' do
             para "Usuarios registrados hoy: #{User.where(created_at: Date.current.beginning_of_day..Date.current.end_of_day).count}"
             para "Usuarios registrados esta semana: #{User.where(created_at: 1.week.ago..Time.current).count}"
           end
+          
+          panel 'Estadísticas de Baneos' do
+            total_users = User.count
+            banned_users = User.banned.count
+            active_users = User.not_banned.count
+            permanent_bans = User.permanently_banned.count
+            temporary_bans = User.temporarily_banned.count
+            
+            para "👥 Total de usuarios: #{total_users}"
+            para "✅ Usuarios activos: #{active_users} (#{total_users > 0 ? ((active_users.to_f / total_users) * 100).round(1) : 0}%)"
+            para "🚫 Usuarios baneados: #{banned_users} (#{total_users > 0 ? ((banned_users.to_f / total_users) * 100).round(1) : 0}%)"
+            para "⏳ Baneos temporales: #{temporary_bans}"
+            para "🔒 Baneos permanentes: #{permanent_bans}"
+            
+            if defined?(BanLog)
+              bans_today = BanLog.bans.where(created_at: Date.current.beginning_of_day..Date.current.end_of_day).count
+              bans_week = BanLog.bans.where('created_at >= ?', 1.week.ago).count
+              unbans_week = BanLog.unbans.where('created_at >= ?', 1.week.ago).count
+              
+              para "📅 Baneos hoy: #{bans_today}"
+              para "📊 Baneos esta semana: #{bans_week}"
+              para "🔓 Desbaneos esta semana: #{unbans_week}"
+            end
+          end
         end
 
         column do
@@ -175,6 +199,48 @@ ActiveAdmin.register_page 'Dashboard' do
             li link_to '⚙️ Configuración de Google OAuth', '#', target: '_blank'
             li link_to '📖 Guía de Desarrollo', '#', target: '_blank'
             li link_to '🐙 Repositorio en GitHub', '#', target: '_blank'
+          end
+        end
+      end
+    end
+
+    # Actividad reciente de baneos
+    if defined?(BanLog)
+      columns do
+        column do
+          panel 'Actividad Reciente de Baneos' do
+            recent_logs = BanLog.includes(:user, :admin_user).recent.limit(10)
+            if recent_logs.any?
+              table_for recent_logs do
+                column('Usuario') do |log|
+                  link_to log.user.full_name, admin_user_path(log.user)
+                end
+                column('Acción') { |log| status_tag log.formatted_action, class: log.ban_action? ? 'error' : 'ok' }
+                column('Razón') { |log| truncate(log.reason, length: 50) }
+                column('Admin') { |log| log.admin_user.email }
+                column('Fecha') { |log| "#{time_ago_in_words(log.created_at)} ago" }
+              end
+            else
+              para 'No hay actividad de baneos registrada.'
+            end
+          end
+        end
+        
+        column do
+          panel 'Usuarios Recientemente Baneados' do
+            recently_banned = User.banned.includes(:banned_by).order(banned_at: :desc).limit(5)
+            if recently_banned.any?
+              table_for recently_banned do
+                column('Usuario') do |user|
+                  link_to user.full_name, admin_user_path(user)
+                end
+                column('Estado') { |user| status_tag user.ban_status, class: 'error' }
+                column('Baneado por') { |user| user.banned_by&.email || 'Sistema' }
+                column('Fecha') { |user| "#{time_ago_in_words(user.banned_at)} ago" }
+              end
+            else
+              para 'No hay usuarios baneados actualmente.'
+            end
           end
         end
       end

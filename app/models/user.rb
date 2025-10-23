@@ -7,6 +7,11 @@ class User < ApplicationRecord
 
   # Relaciones para el sistema de baneos
   belongs_to :banned_by, class_name: 'AdminUser', optional: true
+  has_many :ban_logs, dependent: :destroy
+  
+  # Relaciones para sistema de reportes
+  has_many :received_reports, class_name: 'Report', foreign_key: 'reported_user_id', dependent: :destroy
+  has_many :sent_reports, class_name: 'Report', foreign_key: 'reporter_id', dependent: :destroy
 
   # Validaciones
   validates :email, presence: true, uniqueness: { case_sensitive: false }
@@ -68,21 +73,83 @@ class User < ApplicationRecord
   end
 
   def ban!(reason:, admin_user:, until_date: nil)
-    update!(
-      banned_at: Time.current,
-      banned_reason: reason,
-      banned_by: admin_user,
-      banned_until: until_date
-    )
+    return false if banned?
+    
+    transaction do
+      # Actualizar campos de baneo
+      update!(
+        banned_at: Time.current,
+        banned_reason: reason,
+        banned_by: admin_user,
+        banned_until: until_date
+      )
+      
+      # Crear entrada en el log de baneos (solo si BanLog está definido)
+      if defined?(BanLog)
+        begin
+          ban_log = ban_logs.create!(
+            admin_user: admin_user,
+            action: admin_user&.email == 'system@collapse.app' ? 'auto_banned' : 'banned',
+            reason: reason,
+            banned_until: until_date,
+            ip_address: defined?(Current) && Current.respond_to?(:ip_address) ? Current.ip_address : nil
+          )
+          
+          # Enviar notificación por email
+          UserBanMailer.ban_notification(self, ban_log).deliver_later
+        rescue => e
+          Rails.logger.error "Error creando ban_log o enviando email: #{e.message}"
+          # Continúa sin fallar - el baneo es más importante que el log
+        end
+      else
+        Rails.logger.warn "BanLog no definido, omitiendo creación de log"
+      end
+      
+      Rails.logger.info "Usuario baneado: #{email} por #{admin_user&.email || 'N/A'} - #{reason}"
+    end
+    
+    true
   end
 
   def unban!(admin_user: nil)
-    update!(
-      banned_at: nil,
-      banned_reason: nil,
-      banned_by: nil,
-      banned_until: nil
-    )
+    return false unless banned?
+    
+    transaction do
+      # Crear entrada en el log antes de limpiar campos
+      if defined?(BanLog)
+        begin
+          system_admin = admin_user || AdminUser.find_by(email: 'system@collapse.app')
+          ban_logs.create!(
+            admin_user: system_admin,
+            action: 'unbanned',
+            reason: 'Usuario desbaneado',
+            ip_address: defined?(Current) && Current.respond_to?(:ip_address) ? Current.ip_address : nil
+          )
+        rescue => e
+          Rails.logger.error "Error creando ban_log para unban: #{e.message}"
+          # Continúa sin fallar
+        end
+      end
+      
+      # Limpiar campos de baneo
+      update!(
+        banned_at: nil,
+        banned_reason: nil,
+        banned_by: nil,
+        banned_until: nil
+      )
+      
+      # Enviar notificación por email
+      begin
+        UserBanMailer.unban_notification(self, admin_user).deliver_later if defined?(UserBanMailer)
+      rescue => e
+        Rails.logger.error "Error enviando email de desbaneo: #{e.message}"
+      end
+      
+      Rails.logger.info "Usuario desbaneado: #{email} por #{admin_user&.email || 'Sistema'}"
+    end
+    
+    true
   end
 
   def ban_status
@@ -97,6 +164,48 @@ class User < ApplicationRecord
     return false if banned_until.nil? # Baneo permanente
     
     banned_until <= Time.current
+  end
+  
+  # Métodos para el sistema de reportes
+  def reports_received_count(timeframe = nil)
+    scope = received_reports
+    scope = scope.where('created_at >= ?', timeframe) if timeframe
+    scope.count
+  end
+  
+  def reports_sent_count(timeframe = nil)
+    scope = sent_reports
+    scope = scope.where('created_at >= ?', timeframe) if timeframe
+    scope.count
+  end
+  
+  def recent_reports_count
+    reports_received_count(24.hours.ago)
+  end
+  
+  def spam_reports_count(timeframe = 48.hours.ago)
+    received_reports.where(reason: 'spam')
+                   .where('created_at >= ?', timeframe)
+                   .count
+  end
+  
+  def harassment_reports_count(timeframe = 12.hours.ago)
+    received_reports.where(reason: 'harassment')
+                   .where('created_at >= ?', timeframe)
+                   .count
+  end
+  
+  def threat_reports_count(timeframe = 1.hour.ago)
+    received_reports.where(reason: 'threats')
+                   .where('created_at >= ?', timeframe)
+                   .count
+  end
+  
+  def at_risk_for_auto_ban?
+    recent_reports_count >= 3 || 
+    spam_reports_count >= 2 || 
+    harassment_reports_count >= 1 ||
+    threat_reports_count >= 1
   end
 
   # Método para autenticación con Google

@@ -12,6 +12,10 @@ class AdminUser < ApplicationRecord
   # Normalizar email antes de guardar
   before_save :normalize_email
 
+  # Relaciones
+  has_many :banned_users, class_name: 'User', foreign_key: 'banned_by_id', dependent: :nullify
+  has_many :ban_logs, dependent: :destroy
+
   # Scopes
   scope :active, -> { where(active: true) }
 
